@@ -1,7 +1,8 @@
 <?php
-namespace fenomeno\nHomeSystem\Commands\Player;
+namespace fenomeno\nHomeSystem\Commands\Admin;
 
 use fenomeno\nHomeSystem\Commands\BaseHomeCommand;
+use fenomeno\nHomeSystem\Events\PlayerUpdateLimitEvent;
 use fenomeno\nHomeSystem\libs\CortexPE\Commando\args\IntegerArgument;
 use fenomeno\nHomeSystem\libs\CortexPE\Commando\args\RawStringArgument;
 use fenomeno\nHomeSystem\Sessions\HomeSession;
@@ -25,15 +26,19 @@ class SetHomeLimitCommand extends BaseHomeCommand {
         }
 
         $session = HomeSession::get($target);
-        $session->setLimit($limit, function () use ($limit, $target, $sender) {
-            MessagesUtils::sendTo($sender, "messages.targetLimitUpdated", [
-                '{TARGET}' => $target->getName(),
-                '{LIMIT}'  => $limit
-            ]);
-            MessagesUtils::sendTo($target, "messages.limitUpdatedNotice", [
-                '{LIMIT}'  => $limit
-            ]);
-        });
+        $ev = new PlayerUpdateLimitEvent($target, $session->getLimit(), $limit);
+        $ev->call();
+        if(! $ev->isCancelled()){
+            $session->setLimit($limit, function () use ($limit, $target, $sender) {
+                MessagesUtils::sendTo($sender, "messages.targetLimitUpdated", [
+                    '{TARGET}' => $target->getName(),
+                    '{LIMIT}'  => $limit
+                ]);
+                MessagesUtils::sendTo($target, "messages.limitUpdatedNotice", [
+                    '{LIMIT}'  => $limit
+                ]);
+            });
+        }
 
     }
 

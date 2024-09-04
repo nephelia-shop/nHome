@@ -28,7 +28,7 @@ class DelhomeCommand extends BaseHomeCommand {
             return;
         }
 
-        $main->getManager()->delete($home);
+        $main->getManager()->delete($sender, $home);
         MessagesUtils::sendTo($sender, "messages.homeDeleted", ["{HOME}" => $home->getName()]);
 
     }

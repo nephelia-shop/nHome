@@ -2,11 +2,11 @@
 namespace fenomeno\nHomeSystem;
 
 use fenomeno\nHomeSystem\Commands\Admin\AdminHomeCommand;
+use fenomeno\nHomeSystem\Commands\Admin\SetHomeLimitCommand;
 use fenomeno\nHomeSystem\Commands\Player\DelhomeCommand;
 use fenomeno\nHomeSystem\Commands\Player\HomeCommand;
 use fenomeno\nHomeSystem\Commands\Player\HomesCommand;
 use fenomeno\nHomeSystem\Commands\Player\SethomeCommand;
-use fenomeno\nHomeSystem\Commands\Player\SetHomeLimitCommand;
 use fenomeno\nHomeSystem\Manager\HomeManager;
 use fenomeno\nHomeSystem\Model\HomesModel;
 use fenomeno\nHomeSystem\utils\MessagesUtils;

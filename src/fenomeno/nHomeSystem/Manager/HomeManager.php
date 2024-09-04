@@ -4,6 +4,8 @@ namespace fenomeno\nHomeSystem\Manager;
 use Closure;
 use DateTime;
 use fenomeno\nHomeSystem\Entity\Home;
+use fenomeno\nHomeSystem\Events\PlayerDelhomeEvent;
+use fenomeno\nHomeSystem\Events\PlayerSethomeEvent;
 use fenomeno\nHomeSystem\Exceptions\HomeAlreadyExistsException;
 use fenomeno\nHomeSystem\Exceptions\HomeLimitException;
 use fenomeno\nHomeSystem\Main;
@@ -62,12 +64,16 @@ class HomeManager {
             ->setPlayerId(HomeSession::get($player)->getId())
             ->setDateTime(new DateTime('now'));
 
-        $this->main->getHomesModel()->addHome($home, function (Home $home) use ($onSuccess) {
-            $this->homes->add($home);
-            if($onSuccess){
-                $onSuccess($home);
-            }
-        }, $onFailure);
+        $ev = new PlayerSethomeEvent($home, $player);
+        $ev->call();
+        if (!$ev->isCancelled()){
+            $this->main->getHomesModel()->addHome($home, function (Home $home) use ($onSuccess) {
+                $this->homes->add($home);
+                if($onSuccess){
+                    $onSuccess($home);
+                }
+            }, $onFailure);
+        }
     }
 
     public function getHomesByPage(CollectionInterface $homes, int $homesPerPage = 10, int $pageNum = 1): CollectionInterface
@@ -96,10 +102,14 @@ class HomeManager {
         return null;
     }
 
-    public function delete(Home $home) : void
+    public function delete(Player $player, Home $home) : void
     {
-        $this->homes->remove($home);
-        $this->main->getHomesModel()->remove($home);
+        $ev = new PlayerDelhomeEvent($home, $player);
+        $ev->call();
+        if(!$ev->isCancelled()){
+            $this->homes->remove($home);
+            $this->main->getHomesModel()->remove($home);
+        }
     }
 
     public function getHomes(): Collection

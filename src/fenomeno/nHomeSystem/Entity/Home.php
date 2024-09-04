@@ -134,10 +134,6 @@ class Home implements \IteratorAggregate {
         }
         try {
             $player->teleport($this->location);
-            MessagesUtils::sendTo($player, "messages.teleported", ["{HOME}" => $this->getName()], "§aTéléporté");
-            if (Main::getInstance()->getHomeConfig()->sound){
-                $player->broadcastSound(new EndermanTeleportSound());
-            }
             $onTeleport($this, $player);
         } catch (\Exception $e) {
             //NOTE: Si le monde déconne

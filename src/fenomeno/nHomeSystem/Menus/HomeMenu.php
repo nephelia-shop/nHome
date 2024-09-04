@@ -48,7 +48,7 @@ class HomeMenu {
                         }
                         return;
                     case 1:
-                        $plugin->getManager()->delete($home);
+                        $plugin->getManager()->delete($player, $home);
                         MessagesUtils::sendTo($player, "messages.homeDeleted", ["{HOME}" => $home->getName()]);
                         break;
                 }

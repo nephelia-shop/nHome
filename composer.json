@@ -1,0 +1,35 @@
+{
+  "name": "yourname/homesystem",
+  "license": "MIT",
+  "type": "pocketmine-plugin",
+  "scripts": {
+    "analyze": "vendor/bin/phpstan analyze src",
+    "build": "php -dphar.readonly=0 vendor/bin/pharynx -i=. -c -p=HomeSystem.phar"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/poggit/libasynql"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/SOF3/Commando"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/dktapps-pm-pl/pmforms"
+    }
+  ],
+  "require": {
+    "pocketmine/pocketmine-mp": "^5.0.0",
+    "sof3/libasynql": "^4.0.1",
+    "cortexpe/commando": "dev-patch-1",
+    "sof3/await-generator": "^3.6",
+    "muqsit/simple-packet-handler": "dev-pm5",
+    "dktapps/pmform": "dev-master"
+  },
+  "require-dev": {
+    "sof3/pharynx": "^0.3.0",
+    "phpstan/phpstan": "^1.2"
+  }
+}

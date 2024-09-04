@@ -1,0 +1,109 @@
+database:
+  # The database type. "sqlite" and "mysql" are supported.
+  type: sqlite
+
+  # Edit these settings only if you choose "sqlite".
+  sqlite:
+    # The file name of the database in the plugin data folder.
+    # You can also put an absolute path here.
+    file: data.sqlite
+  # Edit these settings only if you choose "mysql".
+  mysql:
+    host: 127.0.0.1
+    # Avoid using the "root" user for security reasons.
+    username: root
+    password: ""
+    schema: your_schema
+  # The maximum number of simultaneous SQL queries
+  # Recommended: 1 for sqlite, 2 for MySQL. You may want to further increase this value if your MySQL connection is very slow.
+  worker-limit: 1
+
+messages:
+  noHomeWithArg: "{RED}Vous n'avez pas de home avec le nom {HOME}"
+  noHome: "{RED}Aucun home enregistré"
+  homesList: "{GREEN}Homes ({COUNT}/{LIMIT}) : {GRAY}{HOMES}"
+  teleported:
+    message: "{GREEN}{HOME}\nVous avez bien été téléporté!"
+    type: "title"
+  notFound: "{RED}{TARGET} n'est pas connecté"
+  targetLimitUpdated: "{GREEN}Vous avez changé la limite de home de {TARGET} à {LIMIT}"
+  limitUpdatedNotice: "{ORANGE}Votre limit de home a été changé à {LIMIT}"
+  limitWarning: "{RED}Vous avez atteint la limite de home !"
+  homeAlreadyExists: "{RED}Un home du même nom existe !"
+  sethome: "{GREEN}Vous avez bien ajouté le home {HOME}"
+  homeDeleted: "{GREEN}Vous avez bien supprimé le home {HOME}"
+  positionCorrompu: "{RED}Position corrompue (world pas load)" # sûrement le world qui n'est pas load
+
+settings:
+  sound: true
+  default-limit: 5
+
+forms:
+  default:
+    title: "Home"
+    text: "{GRAY}- {WHITE}Que voulez-vous faire"
+    buttons:
+      homes: "Liste de vos homes"
+      sethome: "Créer un home"
+      delhome: "Supprimer un home"
+      quit: "{RED}Quitter"
+  list:
+    title: "Homes"
+    text: "{GRAY}- {WHITE}Selectionnez un home"
+    buttons:
+      home: "{HOME}\n{GRAY}Par {PLAYER}"
+      nextPage: "Prochaine page"
+  addOrDel:
+    title: "Homes"
+    input: "{GRAY}- {WHITE}Écrivez le nom du home"
+  home:
+    title: "{HOME}"
+    text:
+      player: |
+        {GRAY}Home : {WHITE}{HOME}
+        
+        {GRAY}- {WHITE}Que voulez-vous faire:
+      admin: |
+        {GRAY}Home: {WHITE}{HOME}
+        {GRAY}Id Home: {WHITE}{HOME_ID}
+        {GRAY}Joueur: {WHITE}{PLAYER}
+        {GRAY}Id Joueur: {WHITE}{PLAYER_ID}
+        {GRAY}Date: {WHITE}{DATE}
+        
+        {GRAY}- {WHITE}Que voulez-vous faire
+    buttons:
+      teleport: "Se téléporter"
+      delete: "Supprimer"
+      quit: "{RED}Quitter"
+
+commands:
+  home:
+    description: "Se téléporter à votre home | Ouvrir le menu des homes"
+    aliases:
+      - "home:tp"
+    usage: "/home (home:optional)"
+  homes:
+    description: "Afficher la liste de vos homes"
+    aliases:
+      - "home:list"
+    usage: "/homes"
+  sethomelimit:
+    description: "Changer la limite de home à un joueur"
+    aliases:
+      - "home:setlimit"
+    usage: "/sethomelimit (player) (limit)"
+  delhome:
+    description: "Supprimer un home"
+    aliases:
+      - "home:delhome"
+    usage: "/delhome (home)"
+  sethome:
+    description: "Ajouter un home"
+    aliases:
+      - "home:add"
+      - "home:set"
+      - "addhome"
+    usage: "/sethome (home)"
+  adminhome:
+    description: "Ouvrir le menu d'admin home"
+    usage: "/adminhome"

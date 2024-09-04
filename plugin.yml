@@ -1,0 +1,20 @@
+name: nHomeSystem
+main: fenomeno\nHomeSystem\Main
+api: 5.0.0
+version: 0.1
+author: fenomeno
+website: https://discord.gg/JTcefgZMd3
+
+permissions:
+  nephelia.homes.home:
+    default: true
+  nephelia.homes.sethome:
+    default: true
+  nephelia.homes.delhome:
+    default: true
+  nephelia.homes.homes:
+    default: true
+  nephelia.homes.sethomelimit:
+    default: true
+  nephelia.homes.adminhome:
+    default: op

@@ -2,6 +2,7 @@
 namespace fenomeno\nHomeSystem\Model;
 
 use Closure;
+use Exception;
 use fenomeno\nHomeSystem\Entity\Home;
 use fenomeno\nHomeSystem\libs\poggit\libasynql\DataConnector;
 use fenomeno\nHomeSystem\libs\poggit\libasynql\libasynql;
@@ -76,20 +77,27 @@ class HomesModel {
         return $promise->getPromise();
     }
 
-    public function updateLimit(HomeSession $session, int $limit, ?callable $onUpdate = null) : void
+    public function remove(Home $home, ?Closure $onSuccess = null, ?Closure $onError = null) : void
     {
-        Await::f2c(function () use ($limit, $session): Generator{
-            yield from $this->database->asyncChange(HomeQueries::UPDATE_LIMIT_QUERY, [
-                'id'    => $session->getId(),
-                'limit' => $limit,
-            ]);
-        }, $onUpdate);
+        Await::f2c(function () use ($onError, $onSuccess, $home) {
+            try {
+                $result = yield from $this->database->asyncGeneric(HomeQueries::DELETE_HOME_QUERY, ['id' => $home->getId()]);
+
+                if($onSuccess){
+                    $onSuccess($result);
+                }
+            } catch (Exception $e){
+                if($onError){
+                    $onError($e);
+                }
+            }
+        });
     }
 
     /** @throws */
     public function addHome(Home $home, ?Closure $onSuccess = null, ?Closure $onFailure = null) : void
     {
-        $this->database->executeInsert(HomeQueries::ADD_HOME_QUERY, $home->getIterator()->getArrayCopy(), function (int $insertId, int $affectedRows) use ($onSuccess, $home) {
+        $this->database->executeInsert(HomeQueries::ADD_HOME_QUERY, $home->getIterator()->getArrayCopy(), function (int $insertId) use ($onSuccess, $home) {
             $home->setId($insertId);
             $onSuccess($home);
         }, function(SqlError $error) use ($onFailure) {
@@ -100,9 +108,14 @@ class HomesModel {
 
     }
 
-    public function remove(Home $home) : void
+    public function updateLimit(HomeSession $session, int $limit, ?callable $onUpdate = null) : void
     {
-        Await::f2c(fn() => yield from $this->database->asyncGeneric(HomeQueries::DELETE_HOME_QUERY, ['id' => $home->getId()]));
+        Await::f2c(function () use ($limit, $session): Generator{
+            yield from $this->database->asyncChange(HomeQueries::UPDATE_LIMIT_QUERY, [
+                'id'    => $session->getId(),
+                'limit' => $limit,
+            ]);
+        }, $onUpdate);
     }
 
 }

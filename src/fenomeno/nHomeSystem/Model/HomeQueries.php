@@ -1,7 +1,7 @@
 <?php
 namespace fenomeno\nHomeSystem\Model;
 
-class HomeQueries {
+interface HomeQueries {
 
     public const INIT_PLAYERS_QUERY = "homes.players.init";
     public const INIT_HOMES_QUERY   = "homes.init";

@@ -102,13 +102,13 @@ class HomeManager {
         return null;
     }
 
-    public function delete(Player $player, Home $home) : void
+    public function delete(Player $player, Home $home, ?Closure $onSuccess = null, ?Closure $onError = null) : void
     {
         $ev = new PlayerDelhomeEvent($home, $player);
         $ev->call();
         if(!$ev->isCancelled()){
             $this->homes->remove($home);
-            $this->main->getHomesModel()->remove($home);
+            $this->main->getHomesModel()->remove($home, $onSuccess, $onError);
         }
     }
 

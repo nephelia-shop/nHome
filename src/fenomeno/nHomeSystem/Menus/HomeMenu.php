@@ -1,6 +1,7 @@
 <?php
 namespace fenomeno\nHomeSystem\Menus;
 
+use Exception;
 use fenomeno\nHomeSystem\Entity\Home;
 use fenomeno\nHomeSystem\libs\dktapps\pmforms\MenuForm;
 use fenomeno\nHomeSystem\libs\dktapps\pmforms\MenuOption;
@@ -48,8 +49,11 @@ class HomeMenu {
                         }
                         return;
                     case 1:
-                        $plugin->getManager()->delete($player, $home);
-                        MessagesUtils::sendTo($player, "messages.homeDeleted", ["{HOME}" => $home->getName()]);
+                        $plugin->getManager()->delete($player, $home, function () use ($home, $player) {
+                            MessagesUtils::sendTo($player, "messages.homeDeleted", ["{HOME}" => $home->getName()]);
+                        }, function (Exception $e) use ($player) {
+                            $player->sendMessage("§cUne erreur s'est produite lors de la suppression du home, Erreur : " . $e->getMessage());
+                        });
                         break;
                 }
             }

@@ -1,6 +1,7 @@
 <?php
 namespace fenomeno\nHomeSystem\Commands\Player;
 
+use Exception;
 use fenomeno\nHomeSystem\Commands\BaseHomeCommand;
 use fenomeno\nHomeSystem\libs\CortexPE\Commando\args\RawStringArgument;
 use fenomeno\nHomeSystem\libs\CortexPE\Commando\constraint\InGameRequiredConstraint;
@@ -28,8 +29,11 @@ class DelhomeCommand extends BaseHomeCommand {
             return;
         }
 
-        $main->getManager()->delete($sender, $home);
-        MessagesUtils::sendTo($sender, "messages.homeDeleted", ["{HOME}" => $home->getName()]);
+        $main->getManager()->delete($sender, $home, function () use ($home, $sender) {
+            MessagesUtils::sendTo($sender, "messages.homeDeleted", ["{HOME}" => $home->getName()]);
+        }, function (Exception $e) use ($sender) {
+            $sender->sendMessage("§cUne erreur s'est produite lors de la suppression du home, Erreur : " . $e->getMessage());
+        });
 
     }
 
@@ -41,7 +45,7 @@ class DelhomeCommand extends BaseHomeCommand {
         $this->registerArgument(0, new RawStringArgument(self::HOME_ARGUMENT));
     }
 
-    public function getPermission()
+    public function getPermission() : string
     {
         return "nephelia.homes.delhome";
     }

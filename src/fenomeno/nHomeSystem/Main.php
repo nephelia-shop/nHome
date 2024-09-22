@@ -7,6 +7,7 @@ use fenomeno\nHomeSystem\Commands\Player\DelhomeCommand;
 use fenomeno\nHomeSystem\Commands\Player\HomeCommand;
 use fenomeno\nHomeSystem\Commands\Player\HomesCommand;
 use fenomeno\nHomeSystem\Commands\Player\SethomeCommand;
+use fenomeno\nHomeSystem\libs\Pimple\Container;
 use fenomeno\nHomeSystem\Manager\HomeManager;
 use fenomeno\nHomeSystem\Model\HomesModel;
 use fenomeno\nHomeSystem\utils\MessagesUtils;
@@ -20,6 +21,7 @@ class Main extends PluginBase {
     private HomeManager $manager;
     private HomeConfig $homeConfig;
     private array $homeCommands = [];
+    private Container $container;
 
     protected function onLoad(): void
     {
@@ -32,9 +34,11 @@ class Main extends PluginBase {
 
     protected function onEnable(): void
     {
+        $this->container = new Container();
         $this->homesModel = new HomesModel($this);
-        $this->manager    = new HomeManager($this);
+        $this->container[HomesModel::MODEL] = fn($c) => $this->homesModel;
 
+        $this->manager    = new HomeManager($this);
 
         $this->getServer()->getCommandMap()->registerAll('nepheliashop:homes', $this->homeCommands = [
             new HomeCommand($this, "home"),
@@ -51,6 +55,11 @@ class Main extends PluginBase {
         return $this->manager;
     }
 
+    /**
+     * //TODO utilisation des containers pour plus de model
+     *
+     * @return HomesModel
+     */
     public function getHomesModel(): HomesModel
     {
         return $this->homesModel;
@@ -70,6 +79,11 @@ class Main extends PluginBase {
     protected function onDisable(): void
     {
         $this->homesModel->close();
+    }
+
+    public function getContainer(): Container
+    {
+        return $this->container;
     }
 
 }

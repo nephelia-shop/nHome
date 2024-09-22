@@ -4,8 +4,6 @@ namespace fenomeno\nHomeSystem\Model;
 use Closure;
 use Exception;
 use fenomeno\nHomeSystem\Entity\Home;
-use fenomeno\nHomeSystem\libs\poggit\libasynql\DataConnector;
-use fenomeno\nHomeSystem\libs\poggit\libasynql\libasynql;
 use fenomeno\nHomeSystem\libs\poggit\libasynql\SqlError;
 use fenomeno\nHomeSystem\libs\SOFe\AwaitGenerator\Await;
 use fenomeno\nHomeSystem\Main;
@@ -15,20 +13,9 @@ use pocketmine\promise\Promise;
 use pocketmine\promise\PromiseResolver;
 use fenomeno\nHomeSystem\Sessions\HomeSession;
 
-class HomesModel {
+class HomesModel extends Model {
 
-    private DataConnector $database;
-
-    public function __construct(
-        protected Main $main
-    ) {
-        $main->saveDefaultConfig();
-        $this->database = libasynql::create($main, $main->getConfig()->get("database"), [
-            "sqlite" => "sql/sqlite.sql",
-        ]);
-        $this->database->executeGeneric(HomeQueries::INIT_PLAYERS_QUERY);
-        $this->database->executeGeneric(HomeQueries::INIT_HOMES_QUERY);
-    }
+    public const MODEL = 'home_model';
 
     public function loadHomes() : Promise
     {
@@ -94,7 +81,13 @@ class HomesModel {
         });
     }
 
-    /** @throws */
+    /**
+     * @param Home $home
+     * @param Closure|null $onSuccess
+     * @param Closure|null $onFailure
+     * @return void
+     * @throws Exception
+     */
     public function addHome(Home $home, ?Closure $onSuccess = null, ?Closure $onFailure = null) : void
     {
         $this->database->executeInsert(HomeQueries::ADD_HOME_QUERY, $home->getIterator()->getArrayCopy(), function (int $insertId) use ($onSuccess, $home) {
@@ -108,13 +101,22 @@ class HomesModel {
 
     }
 
-    public function updateLimit(HomeSession $session, int $limit, ?callable $onUpdate = null) : void
+    public function updateLimit(HomeSession $session, int $limit, ?Closure $onUpdate = null, ?Closure $onFail = null) : void
     {
-        Await::f2c(function () use ($limit, $session): Generator{
-            yield from $this->database->asyncChange(HomeQueries::UPDATE_LIMIT_QUERY, [
-                'id'    => $session->getId(),
-                'limit' => $limit,
-            ]);
+        Await::f2c(function () use ($onUpdate, $onFail, $limit, $session): Generator{
+            try {
+                $result = yield from $this->database->asyncChange(HomeQueries::UPDATE_LIMIT_QUERY, [
+                    'id'    => $session->getId(),
+                    'limit' => $limit,
+                ]);
+                if ($onUpdate){
+                    $onUpdate($result);
+                }
+            } catch (Exception $e){
+                if($onFail){
+                    $onFail($e);
+                }
+            }
         }, $onUpdate);
     }
 

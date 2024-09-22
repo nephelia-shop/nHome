@@ -18,3 +18,5 @@ permissions:
     default: true
   nephelia.homes.adminhome:
     default: op
+  vip:
+    default: true

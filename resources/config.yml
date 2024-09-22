@@ -37,6 +37,9 @@ messages:
 settings:
   sound: true
   default-limit: 5
+  permissionsLimit:
+    vip: 10
+    mod: 15
 
 forms:
   default:

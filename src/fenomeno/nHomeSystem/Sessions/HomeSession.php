@@ -19,16 +19,20 @@ class HomeSession {
 
     private static function loadSessionData(Player $player) : HomeSession
     {
-        return (new self())->loadData($player);
+        return (new self($player))->loadData();
     }
 
-    private function loadData(Player $player) : HomeSession
+    /**
+     * //TODO ENLEVER SINGLETON
+     *
+     * @return HomeSession
+     */
+    private function loadData() : HomeSession
     {
-        Main::getInstance()->getHomesModel()->loadPlayer($player)->onCompletion(function (array $data) use ($player) {
-            //load après l'authentification
+        Main::getInstance()->getHomesModel()->loadPlayer($this->player)->onCompletion(function (array $data) {
             $this->id = (int)$data['id'];
             $this->limit = (int)$data['home_limit'];
-        }, fn() => $player->kick("§cVotre connexion est instable, veuillez vous reconnecter"));
+        }, fn() => $this->player->kick("§cVotre connexion est instable, veuillez vous reconnecter"));
 
         return $this;
     }
@@ -38,8 +42,9 @@ class HomeSession {
     private   int $limit;
     //private Collection $homes;
 
-    public function __construct()
-    {
+    public function __construct(
+        protected Player $player
+    ){
         //faut build un orm pour libasynql ou pmmp
         //$this->homes = new Collection(Home::class);
         $this->limit = Main::getInstance()->getHomeConfig()->limit;
@@ -47,13 +52,26 @@ class HomeSession {
 
     public function getLimit(): int
     {
-        return $this->limit;
+        if (! $this->player->isConnected()){
+            return $this->limit;
+        }
+
+        $currentLimit = $this->limit;
+        foreach (Main::getInstance()->getHomeConfig()->permissionsLimit as $perm => $limit){
+            if ($this->player->hasPermission($perm) && $currentLimit < $limit){
+                $currentLimit = $limit;
+            } else {
+                break;
+            }
+        }
+
+        return $currentLimit;
     }
 
-    public function setLimit(int $limit, ?callable $onUpdate = null): HomeSession
+    public function setLimit(int $limit, ?\Closure $onUpdate = null): HomeSession
     {
-        $this->limit = $limit; // pas besoin de check du cache
         Main::getInstance()->getHomesModel()->updateLimit($this, $limit, $onUpdate);
+        $this->limit = $limit; // pas besoin de check du cache
 
         return $this;
     }
